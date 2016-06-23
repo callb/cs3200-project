@@ -9,29 +9,10 @@ DROP TABLE IF EXISTS Line;
 
 CREATE TABLE Line
 (
-	color				ENUM('red', 'orange', 'green', 'blue', 'silver') NOT NULL,
+	color				ENUM('Red', 'Orange', 'Green', 'Blue', 'Silver') NOT NULL,
 	subline				VARCHAR(30) NOT NULL,
-    
-	week_open_time		TIME,
-    week_close_time		TIME,
-	week_rush_service	INT,
-    week_midday_service	INT,
-    week_even_service	INT,
-    week_night_service	INT,
-
-    sat_open_time		TIME,
-    sat_close_time		TIME,
-    sat_AM_service		INT,
-    sat_PM_service		INT,
-    sat_even_service	INT,
-    sat_night_service	INT,
-
-    sun_open_time		TIME,
-    sun_close_time		TIME,
-    sun_AM_service		INT,
-    sun_PM_service		INT,
-    sun_even_service	INT,
-    sun_night_service	INT,
+    direction			VARCHAR(30) NOT NULL,
+    -- direction is not needed for uniqueness, just a use field for the application
 
     CONSTRAINT line_pk
 		PRIMARY KEY(color, subline)
@@ -76,44 +57,4 @@ CREATE TABLE Track
 		FOREIGN KEY (second_station) 	REFERENCES Station(station_name)
 );
 
--- Clears all records
-SET SQL_SAFE_UPDATES = 0;
-DELETE FROM Line;
-
--- Inserts records
-INSERT INTO Line 
-(	color,
-	subline,
-	week_open_time,
-    week_close_time,
-	week_rush_service,
-    week_midday_service,
-    week_even_service,
-    week_night_service,
-    sat_open_time,
-    sat_close_time,
-    sat_AM_service,
-    sat_PM_service,
-    sat_even_service,
-    sat_night_service,
-    sun_open_time,
-    sun_close_time,
-    sun_AM_service,
-    sun_PM_service,
-    sun_even_service,
-    sun_night_service
-)
-VALUES
-('red', 'Alewife',
- time_format("05:24AM", "%h:%i%p"),
- time_format("00:15AM", "%h:%i%p"),
- 9, 14, 12, 12,
- time_format("05:24AM", "%h:%i%p"),
- time_format("00:15AM", "%h:%i%p"),
- 14, 14, 14, 14,
- time_format("06:08AM", "%h:%i%p"),
- time_format("00:15AM", "%h:%i%p"),
- 16, 16, 16, 16
- );
- 
  SELECT * FROM Line;

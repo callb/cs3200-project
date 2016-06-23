@@ -2,15 +2,14 @@
 
 import requests, json, datetime
 
+api_key = "wX9NwuHnZU2ToO7GmGR9uw"
+
+
 # makes a prediction for a station time
 def make_prediction(dest, line, direc, subline):
-    api_key = "wX9NwuHnZU2ToO7GmGR9uw"
     query = "predictionsbystop"
-
     url = "http://realtime.mbta.com/developer/api/v2/" + query + "?api_key="
     url += api_key + "&stop=" + dest + "&format=json"
-    #url = "http://realtime.mbta.com/developer/api/v2/" + query + "?api_key="
-    #url += api_key + "&route=Red&format=json"
 
     response = requests.get(url)
     subway_data = parse_prediction(response, line, direc, subline)
@@ -20,6 +19,7 @@ def make_prediction(dest, line, direc, subline):
 #parses prediction json response
 def parse_prediction(response, line, direc, subline):
     data = response.json()["mode"]
+    print data
     subway_data = None
     possible_trips = []
     times = []
@@ -29,6 +29,7 @@ def parse_prediction(response, line, direc, subline):
             subway_data = x["route"]
 
     # search subway data for correct line
+    print subway_data
     for x in subway_data:
         if x["route_id"] == line:
             subway_data = x["direction"]
@@ -51,5 +52,25 @@ def parse_prediction(response, line, direc, subline):
         time = time.split(" ")[3]
         times.append(time)
 
-    # returns the most recent time
-    return times[0]
+    return times
+
+
+# find the api name for a specific stop
+def find_api_name(line, station):
+        url = "http://realtime.mbta.com/developer/api/v2/stopsbyroute?api_key="
+        url+= api_key + "&route=" + line + "&format=json"
+        response = requests.get(url)
+        api_name = parse_api_name(response, station)
+        return api_name
+
+# parse stopsbyroute request for the station api name
+def parse_api_name(response, station):
+    data = response.json()["direction"]
+    for x in data:
+        y = x["stop"]
+        for y in x:
+            stops = x["stop"]
+            for stop in stops:
+                if stop["parent_station_name"] == station:
+                    return stop["parent_station"]
+    return None
