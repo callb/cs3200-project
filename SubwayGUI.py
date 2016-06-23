@@ -225,11 +225,11 @@ class Example(Frame):
 
         # Column label to indication Station selection
         lineLabel = Label(self, text="Select an MBTA Subway Line", fg="blue")
-        lineLabel.grid(row=1, column=1, columnspan=2, pady=10)
+        lineLabel.grid(row=1, column=1, pady=10)
 
         # Column label to indicate Station selection
         stationLabel = Label(self, text="Select a Station", fg="blue")
-        stationLabel.grid(row=1, column=3, columnspan=2, pady=10)
+        stationLabel.grid(row=1, column=2, pady=10)
 
         # Row label
         departMessage = Label(self, text="Depart from: ")
@@ -238,13 +238,13 @@ class Example(Frame):
         # MBTA Line drop-down menu for starting station
         departLine = StringVar(self)
         departLineMenu = OptionMenu(self, departLine, *lineOptions, command=self.onSelectDepartColor)
-        departLineMenu.grid(row=2, column=1, columnspan=2, padx=5, pady=10, sticky="w")
+        departLineMenu.grid(row=2, column=1, padx=5, pady=10, sticky="w")
         departLineMenu.config(width=8)
 
         # Departure time entry box
         departTime = StringVar(value="(optional) Time of departure")
         departEntry = Entry(self, textvariable=departTime, fg="gray")
-        departEntry.grid(row=2, column=5)
+        departEntry.grid(row=2, column=3)
         departEntry.config(width=20)
 
         # Row label
@@ -254,13 +254,13 @@ class Example(Frame):
         # MBTA Line drop-down menu for ending station
         arriveLine = StringVar(self)
         arriveLineMenu = OptionMenu(self, arriveLine, *lineOptions, command=self.onSelectArriveColor)
-        arriveLineMenu.grid(row=3, column=1, columnspan=2, padx=5, pady=10, sticky="w")
+        arriveLineMenu.grid(row=3, column=1, padx=5, pady=10, sticky="w")
         arriveLineMenu.config(width=8)
 
         # Arrival time entry box
         arriveTime = StringVar(value="(optional) Time of arrival")
         arriveEntry = Entry(self, textvariable=arriveTime, fg="gray")
-        arriveEntry.grid(row=3, column=5)
+        arriveEntry.grid(row=3, column=3)
         arriveEntry.config(width=20)
 
         # Button to retrieve times for current route
@@ -269,7 +269,7 @@ class Example(Frame):
 
         # Output box
         self.outputBox = Text(self)
-        self.outputBox.grid(row=5, column=1, columnspan=4)
+        self.outputBox.grid(row=5, column=1, columnspan=3)
         self.outputBox.config(state=DISABLED, height=10)
 
         # Scrollbar for Output box
@@ -332,7 +332,7 @@ class Example(Frame):
         if self.departStation != None:
             self.departStation.destroy()
         self.departStation = departStationMenu
-        self.departStation.grid(row=2, column=3, columnspan=2, padx=10, pady=10, sticky="w")
+        self.departStation.grid(row=2, column=2, padx=5, pady=10, sticky="w")
 
 
     def onSelectArriveColor(self, currentLine):
@@ -353,7 +353,7 @@ class Example(Frame):
         if self.arriveStation != None:
             self.arriveStation.destroy()
         self.arriveStation = arriveStationMenu
-        self.arriveStation.grid(row=3, column=3, columnspan=2, padx=10, pady=10, sticky="w")
+        self.arriveStation.grid(row=3, column=2, padx=5, pady=10, sticky="w")
 
 def main():
     root = Tk()
