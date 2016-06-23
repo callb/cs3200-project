@@ -34,7 +34,6 @@ greenLineStations = [
     "Boylston Street",
     "Arlington",
     "Copley",
-    "----------------------",
     "B, C, D - Hynes Convention Center",
     "B, C, D - Kenmore",
     "B - Blandford Street",
@@ -55,7 +54,6 @@ greenLineStations = [
     "B - Chestnut Hill Avenue",
     "B - South Street",
     "B - Boston College",
-    "----------------------",
     "C - St. Marys Street",
     "C - Hawes Street",
     "C - Kent Street",
@@ -69,7 +67,6 @@ greenLineStations = [
     "C - Dean Road",
     "C - Englewood Avenue",
     "C - Cleveland Circle",
-    "----------------------",
     "D - Fenway",
     "D - Longwood",
     "D - Brookline Village",
@@ -83,7 +80,6 @@ greenLineStations = [
     "D - Waban",
     "D - Woodland",
     "D - Riverside",
-    "----------------------",
     "E - Prudential",
     "E - Symphony",
     "E - Northeastern University",
@@ -131,13 +127,11 @@ redLineStations = [ "Alewife",
                     "Broadway",
                     "Andrew",
                     "JFK/UMass",
-                    "------------------",
                     "Braintree Branch - North Quincy",
                     "Braintree Branch - Wollaston",
                     "Braintree Branch - Quincy Center",
                     "Braintree Branch - Quincy Adams",
                     "Braintree Branch - Braintree",
-                    "------------------",
                     "Ashmont Branch - Savin Hill",
                     "Ashmont Branch - Fields Corner",
                     "Ashmont Branch - Shawmut",
@@ -150,7 +144,38 @@ redLineStations = [ "Alewife",
                     "Mattapan Branch - Capen Street",
                     "Mattapan Branch - Mattapan",]
 
-silverLineStations = [ "Silver" ]
+silverLineStations = [
+    "SL1, SL2, SL4 - South Station",
+    "SL1, SL2 - Courthouse",
+    "SL1, SL2 - World Trade Center",
+    "SL1, SL2 - Silver Line Way",
+    "SL1 - Logan Airport Terminal A",
+    "SL1 - Logan Airport Terminal B south",
+    "SL1 - Logan Airport Terminal B north",
+    "SL1 - Logan Airport Terminal C",
+    "SL1 - Logan Airport Terminal E",
+    "SL1 - Seaport Hotel",
+    "SL2 - 306 Northern Avenue",
+    "SL2 - Northern Avenue & Harbor Street",
+    "SL2 - Northern Avenue & Tide Street",
+    "SL2 - 21 Dry Dock Avenue",
+    "SL2 - 25 Dry Dock Avenue",
+    "SL2 - 88 Black Falcon Avenue",
+    "SL2 - Design Center",
+    "SL4, SL5 - Dudley Square",
+    "SL4, SL5 - Melnea Cass Boulevard",
+    "SL4, SL5 - Lenox Street",
+    "SL4, SL5 - Massachusetts Avenue",
+    "SL4, SL5 - Worcester Square",
+    "SL4, SL5 - Newton Street",
+    "SL4, SL5 - Union Park Street",
+    "SL4, SL5 - East Berkeley Street",
+    "SL4, SL5 - Herald Street",
+    "SL4, SL5 - Tufts Medical Center",
+    "SL4, SL5 - Chinatown",
+    "SL5 - Boylston",
+    "SL5 - Downtown Crossing"
+]
 
 class Example(Frame):
     def __init__(self, parent):
@@ -182,10 +207,13 @@ class Example(Frame):
 
     def initUI(self):
 
+        self.departStation = None
+        self.arriveStation = None
+
         self.parent.title("MBTA Subway Route Planner")
         self.pack(fill=BOTH, expand=True)
 
-        # Button
+        # Buttons for CRUD
         newButton = Button(self, text="New route", command=self.newRouteCommand)
         newButton.grid(row=0, column=0)
         saveButton = Button(self, text="Save route", command=self.saveRouteCommand)
@@ -195,51 +223,76 @@ class Example(Frame):
         deleteButton = Button(self, text="Delete current route", command=self.deleteRouteCommand)
         deleteButton.grid(row=0, column=3)
 
-        lineLabel = Label(self, text="Select an MBTA Subway Line")
-        lineLabel.grid(row=1, column=1, columnspan=2, ipady=10)
-        stationLabel = Label(self, text="Select a Station")
-        stationLabel.grid(row=1, column=3, columnspan=2, ipady=10)
+        # Column label to indication Station selection
+        lineLabel = Label(self, text="Select an MBTA Subway Line", fg="blue")
+        lineLabel.grid(row=1, column=1, columnspan=2, pady=10)
 
-        departLine = StringVar(self)
-        arriveLine = StringVar(self)
+        # Column label to indicate Station selection
+        stationLabel = Label(self, text="Select a Station", fg="blue")
+        stationLabel.grid(row=1, column=3, columnspan=2, pady=10)
 
+        # Row label
         departMessage = Label(self, text="Depart from: ")
         departMessage.grid(row=2, column=0)
 
+        # MBTA Line drop-down menu for starting station
+        departLine = StringVar(self)
         departLineMenu = OptionMenu(self, departLine, *lineOptions, command=self.onSelectDepartColor)
-        departLineMenu.grid(row=2, column=1, columnspan=2, ipady=10)
+        departLineMenu.grid(row=2, column=1, columnspan=2, padx=5, pady=10, sticky="w")
+        departLineMenu.config(width=8)
 
+        # Departure time entry box
         departTime = StringVar(value="(optional) Time of departure")
-        departEntry = Entry(self, textvariable=departTime)
+        departEntry = Entry(self, textvariable=departTime, fg="gray")
         departEntry.grid(row=2, column=5)
+        departEntry.config(width=20)
 
+        # Row label
         arriveMessage = Label(self, text="Arrive at: ")
         arriveMessage.grid(row=3, column=0)
 
+        # MBTA Line drop-down menu for ending station
+        arriveLine = StringVar(self)
         arriveLineMenu = OptionMenu(self, arriveLine, *lineOptions, command=self.onSelectArriveColor)
-        arriveLineMenu.grid(row=3, column=1, columnspan=2, ipady=10)
+        arriveLineMenu.grid(row=3, column=1, columnspan=2, padx=5, pady=10, sticky="w")
+        arriveLineMenu.config(width=8)
 
+        # Arrival time entry box
         arriveTime = StringVar(value="(optional) Time of arrival")
-        arriveEntry = Entry(self, textvariable=arriveTime)
+        arriveEntry = Entry(self, textvariable=arriveTime, fg="gray")
         arriveEntry.grid(row=3, column=5)
+        arriveEntry.config(width=20)
 
+        # Button to retrieve times for current route
         updateButton = Button(self, text="Calculate route", command=self.updateRouteCommand)
-        updateButton.grid(row=4, column=1, columnspan=4, ipady=10)
+        updateButton.grid(row=4, column=1, columnspan=4, padx=5, pady=10)
+
+        # Output box
+        self.outputBox = Text(self)
+        self.outputBox.grid(row=5, column=1, columnspan=4)
+        self.outputBox.config(state=DISABLED, height=10)
+
+        # Scrollbar for Output box
+        scrollb = Scrollbar(self, command=self.outputBox.yview)
+        scrollb.grid(row=5, column=4, sticky='nsew')
+        self.outputBox['yscrollcommand'] = scrollb.set
 
         #Menu
         menubar = Menu(self.parent)
         self.parent.config(menu=menubar)
-
         fileMenu = Menu(menubar)
-
-        fileMenu.add_separator()
-
         fileMenu.add_command(label="Exit", command=self.onExit)
-
         menubar.add_cascade(label="File", menu=fileMenu)
 
     def newRouteCommand(self):
-        print("New route request: To be written")
+        if self.arriveStation != None:
+            self.arriveStation.destroy()
+        if self.departStation != None:
+            self.departStation.destroy()
+        self.outputBox.config(state=NORMAL)
+        self.outputBox.delete('1.0', END)
+        self.outputBox.insert(END, "New route request\n")
+        self.outputBox.config(state=DISABLED)
 
     def saveRouteCommand(self):
         print("Write route to database")
@@ -248,29 +301,18 @@ class Example(Frame):
         print("Present all existing routes to user")
 
     def updateRouteCommand(self):
-        print("Update times of arrival for current route, if any")
+        self.outputBox.config(state=NORMAL)
+        self.outputBox.insert(END, "Update times of arrival for current route, if any\n")
+        self.outputBox.config(state=DISABLED)
 
     def deleteRouteCommand(self):
-        print("Delete current route from database, if stored")
+        self.outputBox.config(state=NORMAL)
+        self.outputBox.insert(END, "Delete current route from database, if stored\n")
+        self.outputBox.config(state=DISABLED)
 
     def onExit(self):
         self.disconnectFromDB()
         self.quit()
-
-    # Function for the checkbutton
-    def onClick(self):
-        if self.var.get():
-            self.master.title("Checkbutton")
-        else:
-            self.master.title("Deselected")
-
-    # Function for the listbox
-    def onSelect(self, val):
-        sender = val.widget
-        idx = sender.curselection()
-        value = sender.get(idx)
-
-        self.var.set(value)
 
     def onSelectDepartColor(self, currentLine):
         currentStation = StringVar(self)
@@ -287,7 +329,11 @@ class Example(Frame):
             stationOptions = silverLineStations
 
         departStationMenu = OptionMenu(self, currentStation, *stationOptions)
-        departStationMenu.grid(row=2, column=3, columnspan=2, ipady=10)
+        if self.departStation != None:
+            self.departStation.destroy()
+        self.departStation = departStationMenu
+        self.departStation.grid(row=2, column=3, columnspan=2, padx=10, pady=10, sticky="w")
+
 
     def onSelectArriveColor(self, currentLine):
         currentStation = StringVar(self)
@@ -304,11 +350,14 @@ class Example(Frame):
             stationOptions = silverLineStations
 
         arriveStationMenu = OptionMenu(self, currentStation, *stationOptions)
-        arriveStationMenu.grid(row=3, column=3, columnspan=2, ipady=10)
+        if self.arriveStation != None:
+            self.arriveStation.destroy()
+        self.arriveStation = arriveStationMenu
+        self.arriveStation.grid(row=3, column=3, columnspan=2, padx=10, pady=10, sticky="w")
 
 def main():
     root = Tk()
-    root.geometry("600x400+100+100")
+    root.geometry("800x500+100+100")
     app = Example(root)
     root.mainloop()
 
