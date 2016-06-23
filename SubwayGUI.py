@@ -1,6 +1,12 @@
 from Tkinter import *
 import mysql.connector
 from mysql.connector import errorcode
+from random import *
+from mbta_api import make_prediction, find_api_name
+
+directions_dict = {"Wonderland": "Eastbound", "Bowdoin": "Westbound",
+    "Ashmont": "Southbound", "Braintree": "Southbound", "Alewife": "Northbound",
+    "Forest Hills": "Southbound", "Oak Grove": "Northbound"}
 
 lineOptions = [
     "Blue",
@@ -237,6 +243,7 @@ class Example(Frame):
 
         # MBTA Line drop-down menu for starting station
         departLine = StringVar(self)
+        self.startLine = departLine
         departLineMenu = OptionMenu(self, departLine, *lineOptions, command=self.onSelectDepartColor)
         departLineMenu.grid(row=2, column=1, padx=5, pady=10, sticky="w")
         departLineMenu.config(width=8)
@@ -253,6 +260,7 @@ class Example(Frame):
 
         # MBTA Line drop-down menu for ending station
         arriveLine = StringVar(self)
+        self.endLine = arriveLine
         arriveLineMenu = OptionMenu(self, arriveLine, *lineOptions, command=self.onSelectArriveColor)
         arriveLineMenu.grid(row=3, column=1, padx=5, pady=10, sticky="w")
         arriveLineMenu.config(width=8)
@@ -264,7 +272,7 @@ class Example(Frame):
         arriveEntry.config(width=20)
 
         # Button to retrieve times for current route
-        updateButton = Button(self, text="Calculate route", command=self.updateRouteCommand)
+        updateButton = Button(self, text="Calculate route", command=self.updateRouteCommand(departLine.get(), arriveLine.get()))
         updateButton.grid(row=4, column=1, columnspan=4, padx=5, pady=10)
 
         # Output box
@@ -300,9 +308,36 @@ class Example(Frame):
     def loadRouteCommand(self):
         print("Present all existing routes to user")
 
-    def updateRouteCommand(self):
+    def updateRouteCommand(self, departLine, arriveLine):
+        departStation = self.departStation.getvar()
+        arriveStation = self.arriveStation.getvar()
+        red_sublines = ["Ashmont", "Braintree", "Alewife"]
+        blue_sublines = ["Wonderland", "Bowdoin"]
+        orange_sublines = ["Oak Grove", "Forest Hills"]
+        departSub = None
+        arriveSub = None
+
+        if departLine == "Blue":
+            departSub = random.choice(blue_sublines)
+        elif departLine == "Red":
+            departSub = random.choice(red_sublines)
+        else:
+            departSub = random.choice(orange_sublines)
+
+        if arriveLine == "Blue":
+            arriveSub = random.choice(blue_sublines)
+        elif arriveLine == "Red":
+            arriveSub = random.choice(red_sublines)
+        else:
+            arriveSub = random.choice(orange_sublines)
+
+        departPredict = make_prediction(find_api_name(departLine, departStation), departLine,
+                                        directions_dict.get(departSub), departSub)
+        arrivePredict = make_prediction(find_api_name(arriveLine, arriveStation), arriveLine,
+                                        directions_dict.get(arriveSub), arriveSub)
         self.outputBox.config(state=NORMAL)
-        self.outputBox.insert(END, "Update times of arrival for current route, if any\n")
+        self.outputBox.insert(END, departPredict + "\n")
+        self.outputBox.insert(END, arrivePredict + "\n")
         self.outputBox.config(state=DISABLED)
 
     def deleteRouteCommand(self):
