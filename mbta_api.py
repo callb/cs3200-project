@@ -13,47 +13,69 @@ def make_prediction(dest, line, direc, subline):
 
     response = requests.get(url)
     subway_data = parse_prediction(response, line, direc, subline)
-    print json.dumps(subway_data, indent=4)
+    return subway_data
 
 
 #parses prediction json response
 def parse_prediction(response, line, direc, subline):
     data = response.json()["mode"]
-    print data
     subway_data = None
     possible_trips = []
     times = []
+
+    # boolean if left false, return empty array
+    found = 0
+
     # search for subway data
     for x in data:
         if x["mode_name"] == "Subway":
             subway_data = x["route"]
+            found = 1
+
+    if found:
+        found = 0
+    else:
+        return []
 
     # search subway data for correct line
-    print subway_data
     for x in subway_data:
         if x["route_id"] == line:
             subway_data = x["direction"]
+            found = 1
+
+    if found:
+        found = 0
+    else:
+        return []
 
     #search for correct direction
     for x in subway_data:
         if x["direction_name"] == direc:
             subway_data = x["trip"]
+            found = 1
 
+    if found:
+        found = 0
+    else:
+        return []
     # search for correct subline, store possible trips in string
     for x in subway_data:
         if x["trip_headsign"] == subline:
             possible_trips.append(x)
 
     # retreive possible times for station
-    for trips in possible_trips:
-        time = trips["sch_arr_dt"]
+    for trip in possible_trips:
+        if "Green" in line:
+            time = trip["pre_dt"]
+        else:
+            time = trip["sch_arr_dt"]
         # converts epoch timestamp to 24 hour timestamp
-        time = datetime.datetime.fromtimestamp(float(time)).strftime("%c")
-        time = time.split(" ")[3]
+        time_format = "%H:%M"
+        time = datetime.datetime.fromtimestamp(float(time)).strftime(time_format)
+        # then converts to 12 hour time
         times.append(time)
 
     return times
-
 
 # find the api name for a specific stop
 def find_api_name(line, station):

@@ -5,56 +5,52 @@ CREATE DATABASE IF NOT EXISTS MBTA_Subway;
 
 USE MBTA_Subway;
 
-DROP TABLE IF EXISTS Line;
-
-CREATE TABLE Line
-(
-	color				ENUM('Red', 'Orange', 'Green', 'Blue', 'Silver') NOT NULL,
-	subline				VARCHAR(30) NOT NULL,
-    direction			VARCHAR(30) NOT NULL,
-    -- direction is not needed for uniqueness, just a use field for the application
-
-    CONSTRAINT line_pk
-		PRIMARY KEY(color, subline)
-);
-
 DROP TABLE IF EXISTS Station;
 
 CREATE TABLE Station
 (
-	station_name	VARCHAR(30)		PRIMARY KEY		NOT NULL,
-    address			VARCHAR(100),
-
-    first_line		ENUM('red', 'orange', 'green', 'blue', 'silver') NOT NULL 		REFERENCES Line(color),
-    first_subline	VARCHAR(30)										 NOT NULL		REFERENCES Line(subline),
-
-	second_line		ENUM('red', 'orange', 'green', 'blue', 'silver') DEFAULT NULL   REFERENCES Line(color),
-    second_subline	VARCHAR(30)										 DEFAULT NULL	REFERENCES Line(subline),
-
-	third_line		ENUM('red', 'orange', 'green', 'blue', 'silver') DEFAULT NULL   REFERENCES Line(color),
-    third_subline	VARCHAR(30)										 DEFAULT NULL	REFERENCES Line(subline),
-
-    CONSTRAINT first_line_fk
-		FOREIGN KEY (first_line, first_subline) 	REFERENCES Line(color, subline),
-	CONSTRAINT second_line_fk
-		FOREIGN KEY (second_line, second_subline) 	REFERENCES Line(color, subline),
-	CONSTRAINT third_line_fk
-		FOREIGN KEY (third_line, third_subline) 	REFERENCES Line(color, subline)
+	color				ENUM('Red', 'Orange', 'Green-B', 'Green-C', 'Green-D', 'Green-E', 'Blue') NOT NULL,
+	subline				VARCHAR(30) NOT NULL,
+    direction			VARCHAR(30) NOT NULL,
+    -- direction is not needed for uniqueness, just a use field for the application
+    station_name		VARCHAR(30) NOT NULL,
+    arrival_time_one	TIME 		DEFAULT NULL,
+    arrival_time_two	TIME 		DEFAULT NULL,
+    arrival_time_three	TIME 		DEFAULT NULL,
+    
+    CONSTRAINT line_pk
+		PRIMARY KEY(color, subline, station_name)
 );
 
 DROP TABLE IF EXISTS Track;
 
-CREATE TABLE Track
+DROP TABLE IF EXISTS User;
+CREATE TABLE User
 (
-	first_station	VARCHAR(30)		NOT NULL	REFERENCES Station(station_name),
-    second_station	VARCHAR(30)		NOT NULL 	REFERENCES Station(station_name),
-
-    CONSTRAINT track_pk
-		PRIMARY KEY (first_station, second_station),
-	CONSTRAINT first_station_fk
-		FOREIGN KEY (first_station) 	REFERENCES Station(station_name),
-	CONSTRAINT second_station_fk
-		FOREIGN KEY (second_station) 	REFERENCES Station(station_name)
+	name	VARCHAR(30),
+    username VARCHAR(30) PRIMARY KEY,
+    password VARCHAR(30)
 );
 
- SELECT * FROM Line;
+CREATE TABLE Track
+(
+	user 					VARCHAR(30)		NOT NULL,
+	first_color				ENUM('Red', 'Orange', 'Green-B', 'Green-C', 'Green-D', 'Green-E', 'Blue') NOT NULL,
+	first_subline			VARCHAR(30) 	NOT NULL,
+	first_station			VARCHAR(30)		NOT NULL,
+    -- direction is not needed for uniqueness, just a use field for the application
+	dest_color				ENUM('Red', 'Orange', 'Green-B', 'Green-C', 'Green-D', 'Green-E', 'Blue') NOT NULL,
+	dest_subline			VARCHAR(30) 	NOT NULL,
+    dest_station			VARCHAR(30)		NOT NULL,
+
+    CONSTRAINT track_pk
+		PRIMARY KEY (user, first_color, first_subline, first_station, dest_color, dest_subline, dest_station),
+	CONSTRAINT first_station_fk
+		FOREIGN KEY (first_color, first_subline, first_station) REFERENCES Station(color, subline, station_name),
+	CONSTRAINT second_station_fk
+		FOREIGN KEY (dest_color, dest_subline, dest_station) 	REFERENCES Station(color, subline, station_name),
+	CONSTRAINT user_fk
+		FOREIGN KEY (user)										REFERENCES User(username)
+);
+
+SELECT * FROM Station;

@@ -10,5 +10,5 @@ conn = init_connection()
 
 # station, line, direction, subline
 line = "Orange"
-stop = "Ruggles"
-make_prediction(find_api_name(line, stop), line, "Southbound", "Forest Hills")
+stop = "Haymarket"
+make_prediction(find_api_name(line, stop), line, "Northbound", "Oak Grove")
