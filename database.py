@@ -140,14 +140,21 @@ def populate_data(conn):
                 if not stop == subline:
                     api_name = find_api_name(line, stop)
                     times = make_prediction(api_name, line, direction, subline)
+                    time_1 = 'NULL'
+                    time_2 = 'NULL'
+                    time_3 = 'NULL'
                     if times:
                         time_1 = times[0]
                         if len(times) >= 2:
                             time_2 = times[1]
                             if len(times) >= 3:
                                 time_3 = times[2]
-                    else:
-                        time = 'NULL'
+
+                    print stop
+                    print line
+                    print direction
+                    print subline
+                    print times
 
                     insert_stmt = "INSERT INTO Station (color, subline,"
                     insert_stmt += "direction, station_name, arrival_time_1, "

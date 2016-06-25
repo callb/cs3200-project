@@ -63,12 +63,15 @@ def parse_prediction(response, line, direc, subline):
         if x["trip_headsign"] == subline:
             possible_trips.append(x)
 
+    print possible_trips
+
     # retreive possible times for station
     for trip in possible_trips:
-        if "Green" in line:
-            time = trip["pre_dt"]
-        else:
-            time = trip["sch_arr_dt"]
+        time = trip["pre_dt"]
+        #if "Green" in line:
+        #    time = trip["pre_dt"]
+        #else:
+        #    time = trip["sch_arr_dt"]
         # converts epoch timestamp to 24 hour timestamp
         time_format = "%H:%M"
         time = datetime.datetime.fromtimestamp(float(time)).strftime(time_format)
