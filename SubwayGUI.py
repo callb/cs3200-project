@@ -1,22 +1,36 @@
 from Tkinter import *
 import mysql.connector
 from mysql.connector import errorcode
-from random import *
+import random
 from mbta_api import make_prediction, find_api_name
 
 directions_dict = {"Wonderland": "Eastbound", "Bowdoin": "Westbound",
     "Ashmont": "Southbound", "Braintree": "Southbound", "Alewife": "Northbound",
-    "Forest Hills": "Southbound", "Oak Grove": "Northbound"}
+    "Forest Hills": "Southbound", "Oak Grove": "Northbound",
+    "Park Street": "Eastbound", "North Station": "Eastbound",
+    "Lechmere": "Eastbound", "Government Center": "Eastbound",
+    "Boston College": "Westbound", "Cleveland Circle": "Westbound",
+    "Riverside": "Westbound", "Heath Street": "Westbound"}
 
-lineOptions = [
+line_options = [
     "Blue",
-    "Green",
+    "Green-B",
+    "Green-C",
+    "Green-D",
+    "Green-E",
     "Orange",
     "Red",
-    "Silver"
 ]
 
-blueLineStations = [
+red_sublines = ["Ashmont", "Braintree", "Alewife"]
+blue_sublines = ["Wonderland", "Bowdoin"]
+orange_sublines = ["Oak Grove", "Forest Hills"]
+green_b_sublines = ["Park Street", "Boston College"]
+green_c_sublines = ["North Station", "Cleveland Circle"]
+green_d_sublines = ["Government Center", "Riverside"]
+green_e_sublines = ["Lechmere", "Heath Street"]
+
+blue_line_stations = [
     "Wonderland",
     "Revere Beach",
     "Beachmont",
@@ -30,157 +44,151 @@ blueLineStations = [
     "Bowdoin"
 ]
 
-greenLineStations = [
+green_line_b_stations = [
+    "Park Street",
+    "Boylston",
+    "Arlington",
+    "Copley",
+    "Hynes Convention Center",
+    "Kenmore",
+    "Blandford Street",
+    "Boston Univ. East",
+    "Boston Univ. Center",
+    "Boston Univ. West",
+    "St. Paul Street",
+    "Pleasant Street",
+    "Babcock Street",
+    "Packards Corner",
+    "Harvard Ave.",
+    "Griggs Street/Long Ave.",
+    "Allston Street",
+    "Warren Street",
+    "Washington Street",
+    "Sutherland Road",
+    "Chiswick Road",
+    "Chestnut Hill Ave.",
+    "South Street",
+    "Boston College"
+]
+green_line_c_stations = [
+    "North Station",
+    "Haymarket",
+    "Government Center",
+    "Park Street",
+    "Boylston",
+    "Arlington",
+    "Copley",
+    "Hynes Convention Center",
+    "Kenmore",
+    "St. Marys Street",
+    "Hawes Street",
+    "Kent Street",
+    "St. Paul Street",
+    "Coolidge Corner",
+    "Summit Ave.",
+    "Brandon Hall",
+    "Fairbanks",
+    "Washington Square",
+    "Tappan Street",
+    "Dean Road",
+    "Englewood Ave.",
+    "Cleveland Circle"
+]
+green_line_d_stations = [
+    "Government Center",
+    "Park Street",
+    "Boylston",
+    "Arlington",
+    "Copley",
+    "Hynes Convention Center",
+    "Kenmore",
+    "Fenway",
+    "Longwood",
+    "Brookline Village",
+    "Brookline Hills",
+    "Beaconsfield",
+    "Reservoir",
+    "Chestnut Hill",
+    "Newton Centre",
+    "Newton Highlands",
+    "Eliot",
+    "Waban",
+    "Woodland",
+    "Riverside"
+]
+green_line_e_stations = [
     "Lechmere",
     "Science Park",
     "North Station",
     "Haymarket",
     "Government Center",
     "Park Street",
-    "Boylston Street",
+    "Boylston",
     "Arlington",
     "Copley",
-    "B, C, D - Hynes Convention Center",
-    "B, C, D - Kenmore",
-    "B - Blandford Street",
-    "B - Boston University East",
-    "B - Boston University Center",
-    "B - Boston University West",
-    "B - St. Paul Street",
-    "B - Pleasant Street",
-    "B - Babcock Street",
-    "B - Packards Corner",
-    "B - Harvard Avenue",
-    "B - Griggs Street/Long Avenue",
-    "B - Allston Street",
-    "B - Warren Street",
-    "B - Washington Street",
-    "B - Sutherland Road",
-    "B - Chiswick Road",
-    "B - Chestnut Hill Avenue",
-    "B - South Street",
-    "B - Boston College",
-    "C - St. Marys Street",
-    "C - Hawes Street",
-    "C - Kent Street",
-    "C - St. Paul Street",
-    "C - Coolidge Corner",
-    "C - Summit Avenue",
-    "C - Brandon Hall",
-    "C - Fairbanks",
-    "C - Washington Square",
-    "C - Tappan Street",
-    "C - Dean Road",
-    "C - Englewood Avenue",
-    "C - Cleveland Circle",
-    "D - Fenway",
-    "D - Longwood",
-    "D - Brookline Village",
-    "D - Brookline Hills",
-    "D - Beaconsfield",
-    "D - Reservoir",
-    "D - Chestnut Hill",
-    "D - Newton Centre",
-    "D - Newton Highlands",
-    "D - Eliot",
-    "D - Waban",
-    "D - Woodland",
-    "D - Riverside",
-    "E - Prudential",
-    "E - Symphony",
-    "E - Northeastern University",
-    "E - Museum of Fine Arts",
-    "E - Longwood Medical Area",
-    "E - Brigham Circle",
-    "E - Fenwood Road",
-    "E - Mission Park",
-    "E - Riverway",
-    "E - Back of the Hill",
-    "E - Heath Street"
+    "Prudential",
+    "Symphony",
+    "Northeastern University",
+    "Museum of Fine Arts",
+    "Longwood Medical Area",
+    "Brigham Circle",
+    "Fenwood Road",
+    "Mission Park",
+    "Riverway",
+    "Back of the Hill",
+    "Heath Street"
+]
+orange_line_stations = [
+    "Oak Grove",
+    "Malden Center",
+    "Wellington",
+    "Assembly",
+    "Sullivan Square",
+    "Community College",
+    "North Station",
+    "Haymarket",
+    "State",
+    "Downtown Crossing",
+    "Chinatown",
+    "Tufts Medical Center",
+    "Back Bay",
+    "Massachusetts Ave.",
+    "Ruggles Station",
+    "Roxbury Crossing",
+    "Jackson Square",
+    "Stony Brook",
+    "Green Street",
+    "Forest Hills"]
+
+red_line_stations = [
+    "Alewife",
+    "Davis",
+    "Porter Square",
+    "Harvard Square",
+    "Central Square",
+    "Kendall/MIT",
+    "Charles/MGH",
+    "Park Street",
+    "Downtown Crossing",
+    "South Station",
+    "Broadway",
+    "Andrew",
+    "JFK/UMass",
 ]
 
-orangeLineStations = [ "Oak Grove",
-                       "Malden Center",
-                       "Wellington",
-                       "Assembly",
-                       "Sullivan Square",
-                       "Community College",
-                       "North Station",
-                       "Haymarket",
-                       "State",
-                       "Downtown Crossing",
-                       "Chinatown",
-                       "Tufts Medical Center",
-                       "Back Bay",
-                       "Massachusetts Avenue",
-                       "Ruggles Station",
-                       "Roxbury Crossing",
-                       "Jackson Square",
-                       "Stony Brook",
-                       "Green Street",
-                       "Forest Hills"]
+braintree_alewife_stations = [
+    "North Quincy",
+    "Wollaston",
+    "Quincy Center",
+    "Quincy Adams",
+    "Braintree"
+]
 
-redLineStations = [ "Alewife",
-                    "Davis",
-                    "Porter Square",
-                    "Harvard Square",
-                    "Central Square",
-                    "Kendall",
-                    "Charles/MGH",
-                    "Park Street",
-                    "Downtown Crossing",
-                    "South Station",
-                    "Broadway",
-                    "Andrew",
-                    "JFK/UMass",
-                    "Braintree Branch - North Quincy",
-                    "Braintree Branch - Wollaston",
-                    "Braintree Branch - Quincy Center",
-                    "Braintree Branch - Quincy Adams",
-                    "Braintree Branch - Braintree",
-                    "Ashmont Branch - Savin Hill",
-                    "Ashmont Branch - Fields Corner",
-                    "Ashmont Branch - Shawmut",
-                    "Ashmont Branch - Ashmont",
-                    "Mattapan Branch - Cedar Grove",
-                    "Mattapan Branch - Butler",
-                    "Mattapan Branch - Milton",
-                    "Mattapan Branch - Central Avenue",
-                    "Mattapan Branch - Valley Road",
-                    "Mattapan Branch - Capen Street",
-                    "Mattapan Branch - Mattapan",]
-
-silverLineStations = [
-    "SL1, SL2, SL4 - South Station",
-    "SL1, SL2 - Courthouse",
-    "SL1, SL2 - World Trade Center",
-    "SL1, SL2 - Silver Line Way",
-    "SL1 - Logan Airport Terminal A",
-    "SL1 - Logan Airport Terminal B south",
-    "SL1 - Logan Airport Terminal B north",
-    "SL1 - Logan Airport Terminal C",
-    "SL1 - Logan Airport Terminal E",
-    "SL1 - Seaport Hotel",
-    "SL2 - 306 Northern Avenue",
-    "SL2 - Northern Avenue & Harbor Street",
-    "SL2 - Northern Avenue & Tide Street",
-    "SL2 - 21 Dry Dock Avenue",
-    "SL2 - 25 Dry Dock Avenue",
-    "SL2 - 88 Black Falcon Avenue",
-    "SL2 - Design Center",
-    "SL4, SL5 - Dudley Square",
-    "SL4, SL5 - Melnea Cass Boulevard",
-    "SL4, SL5 - Lenox Street",
-    "SL4, SL5 - Massachusetts Avenue",
-    "SL4, SL5 - Worcester Square",
-    "SL4, SL5 - Newton Street",
-    "SL4, SL5 - Union Park Street",
-    "SL4, SL5 - East Berkeley Street",
-    "SL4, SL5 - Herald Street",
-    "SL4, SL5 - Tufts Medical Center",
-    "SL4, SL5 - Chinatown",
-    "SL5 - Boylston",
-    "SL5 - Downtown Crossing"
+ashmont_alewife_stations = [
+    "Savin Hill",
+    "Fields Corner",
+    "Shawmut",
+    "Ashmont"
 ]
 
 class Example(Frame):
@@ -188,14 +196,19 @@ class Example(Frame):
         Frame.__init__(self, parent)
 
         self.parent = parent
-
+        self.depart_station_menu = None
+        self.arrive_station_menu = None
+        self.start_line = StringVar(self)
+        self.end_line = StringVar(self)
+        self.start_station = StringVar(self)
+        self.end_station = StringVar(self)
+        self.output_box = Text(self)
         self.initUI()
         self.cnx = self.connectToDB()
 
     def connectToDB(self):
         try:
-            cnx = mysql.connector.connect(user='root', password='root', \
-                    host='127.0.0.1', database='MBTA_Subway')
+            cnx = mysql.connector.connect(user='root', password='root', host='127.0.0.1', database='MBTA_Subway')
             print("Connection opened.")
             return cnx
         except mysql.connector.Error as err:
@@ -205,190 +218,216 @@ class Example(Frame):
                 print("Connection failed: Database does not exist.")
             else:
                 print(err)
-
-
     def disconnectFromDB(self):
         self.cnx.close()
         print("Connection closed.")
 
     def initUI(self):
 
-        self.departStation = None
-        self.arriveStation = None
-
         self.parent.title("MBTA Subway Route Planner")
         self.pack(fill=BOTH, expand=True)
 
         # Buttons for CRUD
-        newButton = Button(self, text="New route", command=self.newRouteCommand)
-        newButton.grid(row=0, column=0)
-        saveButton = Button(self, text="Save route", command=self.saveRouteCommand)
-        saveButton.grid(row=0, column=1)
-        loadButton = Button(self, text="Load existing route",command=self.loadRouteCommand)
-        loadButton.grid(row=0, column=2)
-        deleteButton = Button(self, text="Delete current route", command=self.deleteRouteCommand)
-        deleteButton.grid(row=0, column=3)
+        new_button = Button(self, text="New route", command=self.newRouteCommand)
+        new_button.grid(row=0, column=0)
+        save_button = Button(self, text="Save route", command=self.saveRouteCommand)
+        save_button.grid(row=0, column=1)
+        load_button = Button(self, text="Load existing route",command=self.loadRouteCommand)
+        load_button.grid(row=0, column=2)
+        delete_button = Button(self, text="Delete current route", command=self.deleteRouteCommand)
+        delete_button.grid(row=0, column=3)
 
         # Column label to indication Station selection
-        lineLabel = Label(self, text="Select an MBTA Subway Line", fg="blue")
-        lineLabel.grid(row=1, column=1, pady=10)
+        line_label = Label(self, text="Select an MBTA Subway Line", fg="blue")
+        line_label.grid(row=1, column=1, pady=10)
 
         # Column label to indicate Station selection
-        stationLabel = Label(self, text="Select a Station", fg="blue")
-        stationLabel.grid(row=1, column=2, pady=10)
+        station_label = Label(self, text="Select a Station", fg="blue")
+        station_label.grid(row=1, column=2, pady=10)
 
         # Row label
-        departMessage = Label(self, text="Depart from: ")
-        departMessage.grid(row=2, column=0)
+        depart_row_message = Label(self, text="Depart from: ")
+        depart_row_message.grid(row=2, column=0)
 
         # MBTA Line drop-down menu for starting station
-        departLine = StringVar(self)
-        self.startLine = departLine
-        departLineMenu = OptionMenu(self, departLine, *lineOptions, command=self.onSelectDepartColor)
-        departLineMenu.grid(row=2, column=1, padx=5, pady=10, sticky="w")
-        departLineMenu.config(width=8)
+        depart_line_menu = OptionMenu(self, self.start_line, *line_options, command=self.onSelectDepartColor)
+        depart_line_menu.grid(row=2, column=1, padx=5, pady=10, sticky="w")
+        depart_line_menu.config(width=8)
 
         # Departure time entry box
-        departTime = StringVar(value="(optional) Time of departure")
-        departEntry = Entry(self, textvariable=departTime, fg="gray")
-        departEntry.grid(row=2, column=3)
-        departEntry.config(width=20)
+        depart_time = StringVar(value="(optional) Time of departure")
+        depart_entry = Entry(self, textvariable=depart_time)
+        depart_entry.grid(row=2, column=3)
+        depart_entry.config(width=20)
 
         # Row label
-        arriveMessage = Label(self, text="Arrive at: ")
-        arriveMessage.grid(row=3, column=0)
+        arrive_row_message = Label(self, text="Arrive at: ")
+        arrive_row_message.grid(row=3, column=0)
 
         # MBTA Line drop-down menu for ending station
-        arriveLine = StringVar(self)
-        self.endLine = arriveLine
-        arriveLineMenu = OptionMenu(self, arriveLine, *lineOptions, command=self.onSelectArriveColor)
-        arriveLineMenu.grid(row=3, column=1, padx=5, pady=10, sticky="w")
-        arriveLineMenu.config(width=8)
+        arrive_line_menu = OptionMenu(self, self.end_line, *line_options, command=self.onSelectArriveColor)
+        arrive_line_menu.grid(row=3, column=1, padx=5, pady=10, sticky="w")
+        arrive_line_menu.config(width=8)
 
         # Arrival time entry box
-        arriveTime = StringVar(value="(optional) Time of arrival")
-        arriveEntry = Entry(self, textvariable=arriveTime, fg="gray")
-        arriveEntry.grid(row=3, column=3)
-        arriveEntry.config(width=20)
-
-        # Button to retrieve times for current route
-        updateButton = Button(self, text="Calculate route", command=self.updateRouteCommand(departLine.get(), arriveLine.get()))
-        updateButton.grid(row=4, column=1, columnspan=4, padx=5, pady=10)
+        arrive_time = StringVar(value="(optional) Time of arrival")
+        arrive_entry = Entry(self, textvariable=arrive_time)
+        arrive_entry.grid(row=3, column=3)
+        arrive_entry.config(width=20)
 
         # Output box
-        self.outputBox = Text(self)
-        self.outputBox.grid(row=5, column=1, columnspan=3)
-        self.outputBox.config(state=DISABLED, height=10)
+        self.output_box.grid(row=5, column=1, columnspan=3)
+        self.output_box.config(state=DISABLED, height=10)
+
+        # Button to retrieve times for current route
+        update_button = Button(self, text="Calculate route", command=self.updateRouteCommand)
+        update_button.grid(row=4, column=1, columnspan=4, padx=5, pady=10)
 
         # Scrollbar for Output box
-        scrollb = Scrollbar(self, command=self.outputBox.yview)
-        scrollb.grid(row=5, column=4, sticky='nsew')
-        self.outputBox['yscrollcommand'] = scrollb.set
+        scrollbar = Scrollbar(self, command=self.output_box.yview)
+        scrollbar.grid(row=5, column=4, sticky='nsew')
+        self.output_box['yscrollcommand'] = scrollbar.set
 
         #Menu
-        menubar = Menu(self.parent)
-        self.parent.config(menu=menubar)
-        fileMenu = Menu(menubar)
-        fileMenu.add_command(label="Exit", command=self.onExit)
-        menubar.add_cascade(label="File", menu=fileMenu)
+        menu_bar = Menu(self.parent)
+        self.parent.config(menu=menu_bar)
+        file_menu = Menu(menu_bar)
+        file_menu.add_command(label="Exit", command=self.onExit)
+        menu_bar.add_cascade(label="File", menu=file_menu)
 
     def newRouteCommand(self):
-        if self.arriveStation != None:
-            self.arriveStation.destroy()
-        if self.departStation != None:
-            self.departStation.destroy()
-        self.outputBox.config(state=NORMAL)
-        self.outputBox.delete('1.0', END)
-        self.outputBox.insert(END, "New route request\n")
-        self.outputBox.config(state=DISABLED)
+        if self.arrive_station_menu is not None:
+            self.arrive_station_menu.destroy()
+        if self.depart_station_menu is not None:
+            self.depart_station_menu.destroy()
+        self.output_box.config(state=NORMAL)
+        self.output_box.delete('1.0', END)
+        self.output_box.insert(END, "New route request\n")
+        self.output_box.config(state=DISABLED)
 
     def saveRouteCommand(self):
-        print("Write route to database")
+        self.output_box.config(state=NORMAL)
+        self.output_box.insert(END, "Write route to database\n")
+        self.output_box.config(state=DISABLED)
 
     def loadRouteCommand(self):
-        print("Present all existing routes to user")
+        self.output_box.config(state=NORMAL)
+        self.output_box.insert(END, "Load existing routes from database\n")
+        self.output_box.config(state=DISABLED)
 
-    def updateRouteCommand(self, departLine, arriveLine):
-        departStation = self.departStation.getvar()
-        arriveStation = self.arriveStation.getvar()
-        red_sublines = ["Ashmont", "Braintree", "Alewife"]
-        blue_sublines = ["Wonderland", "Bowdoin"]
-        orange_sublines = ["Oak Grove", "Forest Hills"]
-        departSub = None
-        arriveSub = None
+    def updateRouteCommand(self):
+        depart_sublines = None
+        arrive_sublines = None
 
-        if departLine == "Blue":
-            departSub = random.choice(blue_sublines)
-        elif departLine == "Red":
-            departSub = random.choice(red_sublines)
+        if self.start_line == "Blue":
+            depart_sublines = random.choice(blue_sublines)
+        elif self.start_line == "Red":
+            depart_sublines = random.choice(red_sublines)
+        elif self.start_line == "Green-B":
+            depart_sublines = green_b_sublines
+        elif self.start_line == "Green-C":
+            depart_sublines = green_c_sublines
+        elif self.start_line == "Green-D":
+            depart_sublines = green_d_sublines
+        elif self.start_line == "Green-E":
+            depart_sublines = green_e_sublines
         else:
-            departSub = random.choice(orange_sublines)
+            depart_sublines = random.choice(orange_sublines)
 
-        if arriveLine == "Blue":
-            arriveSub = random.choice(blue_sublines)
-        elif arriveLine == "Red":
-            arriveSub = random.choice(red_sublines)
+        if self.end_line == "Blue":
+            arrive_sublines = random.choice(blue_sublines)
+        elif self.end_line == "Red":
+            arrive_sublines = random.choice(red_sublines)
+        elif self.end_line == "Green-B":
+            arrive_sublines = green_b_sublines
+        elif self.end_line == "Green-C":
+            arrive_sublines = green_c_sublines
+        elif self.end_line == "Green-D":
+            arrive_sublines = green_d_sublines
+        elif self.end_line == "Green-E":
+            arrive_sublines = green_e_sublines
         else:
-            arriveSub = random.choice(orange_sublines)
+            arrive_sublines = random.choice(orange_sublines)
 
-        departPredict = make_prediction(find_api_name(departLine, departStation), departLine,
-                                        directions_dict.get(departSub), departSub)
-        arrivePredict = make_prediction(find_api_name(arriveLine, arriveStation), arriveLine,
-                                        directions_dict.get(arriveSub), arriveSub)
-        self.outputBox.config(state=NORMAL)
-        self.outputBox.insert(END, departPredict + "\n")
-        self.outputBox.insert(END, arrivePredict + "\n")
-        self.outputBox.config(state=DISABLED)
+        if self.depart_station_menu is not None:
+            line = self.start_line.get()
+            station = self.start_station.get()
+            self.output_box.config(state=NORMAL)
+            self.output_box.insert(END, "Finding first station...\n")
+            depart_predict = make_prediction(find_api_name(line, station), line,
+                                        directions_dict.get(depart_sublines), depart_sublines)
+
+            self.output_box.insert(END, "Next train at " + self.start_station.get() + ": " + depart_predict + "\n")
+            self.output_box.config(state=DISABLED)
+
+        if self.arrive_station_menu is not None:
+            line = self.end_line.get()
+            station = self.end_station.get()
+            self.output_box.config(state=NORMAL)
+            self.output_box.insert(END, "Finding second station...\n")
+            arrive_predict = make_prediction(find_api_name(line, station), line,
+                                        directions_dict.get(arrive_sublines), arrive_sublines)
+            self.output_box.insert(END, "Next train at " + self.end_station.get() + ": " + arrive_predict + "\n")
+            self.output_box.config(state=DISABLED)
+
 
     def deleteRouteCommand(self):
-        self.outputBox.config(state=NORMAL)
-        self.outputBox.insert(END, "Delete current route from database, if stored\n")
-        self.outputBox.config(state=DISABLED)
+        self.output_box.config(state=NORMAL)
+        self.output_box.insert(END, "Deleted current route from database, if stored\n")
+        self.output_box.config(state=DISABLED)
 
     def onExit(self):
         self.disconnectFromDB()
         self.quit()
 
-    def onSelectDepartColor(self, currentLine):
-        currentStation = StringVar(self)
+    def onSelectDepartColor(self, current_line):
+        station_options = []
 
-        if (currentLine == "Blue"):
-            stationOptions = blueLineStations
-        elif (currentLine == "Green"):
-            stationOptions = greenLineStations
-        elif (currentLine == "Red"):
-            stationOptions = redLineStations
-        elif (currentLine == "Orange"):
-            stationOptions = orangeLineStations
+        if (current_line == "Blue"):
+            station_options = blue_line_stations
+        elif (current_line == "Green-B"):
+            station_options = green_line_b_stations
+        elif (current_line == "Green-C"):
+            station_options = green_line_c_stations
+        elif (current_line == "Green-D"):
+            station_options = green_line_d_stations
+        elif (current_line == "Green-E"):
+            station_options = green_line_e_stations
+        elif (current_line == "Red"):
+            station_options = red_line_stations
         else:
-            stationOptions = silverLineStations
+            station_options = orange_line_stations
 
-        departStationMenu = OptionMenu(self, currentStation, *stationOptions)
-        if self.departStation != None:
-            self.departStation.destroy()
-        self.departStation = departStationMenu
-        self.departStation.grid(row=2, column=2, padx=5, pady=10, sticky="w")
+        depart_station_menu = OptionMenu(self, self.start_station, *station_options)
+        if self.depart_station_menu is not None:
+            self.depart_station_menu.destroy()
+        self.depart_station_menu = depart_station_menu
+        self.depart_station_menu.grid(row=2, column=2, padx=5, pady=10, sticky="w")
 
 
-    def onSelectArriveColor(self, currentLine):
-        currentStation = StringVar(self)
+    def onSelectArriveColor(self, current_line):
+        station_options = []
 
-        if (currentLine == "Blue"):
-            stationOptions = blueLineStations
-        elif (currentLine == "Green"):
-            stationOptions = greenLineStations
-        elif (currentLine == "Red"):
-            stationOptions = redLineStations
-        elif (currentLine == "Orange"):
-            stationOptions = orangeLineStations
+        if (current_line == "Blue"):
+            station_options = blue_line_stations
+        elif (current_line == "Green-B"):
+            station_options = green_line_b_stations
+        elif (current_line == "Green-C"):
+            station_options = green_line_c_stations
+        elif (current_line == "Green-D"):
+            station_options = green_line_d_stations
+        elif (current_line == "Green-E"):
+            station_options = green_line_e_stations
+        elif (current_line == "Red"):
+            station_options = red_line_stations
         else:
-            stationOptions = silverLineStations
+            station_options = orange_line_stations
 
-        arriveStationMenu = OptionMenu(self, currentStation, *stationOptions)
-        if self.arriveStation != None:
-            self.arriveStation.destroy()
-        self.arriveStation = arriveStationMenu
-        self.arriveStation.grid(row=3, column=2, padx=5, pady=10, sticky="w")
+        arrive_station_menu = OptionMenu(self, self.end_station, *station_options)
+        if self.arrive_station_menu is not None:
+            self.arrive_station_menu.destroy()
+        self.arrive_station_menu = arrive_station_menu
+        self.arrive_station_menu.grid(row=3, column=2, padx=5, pady=10, sticky="w")
 
 def main():
     root = Tk()
