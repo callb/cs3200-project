@@ -18,6 +18,10 @@ def make_prediction(dest, line, direc, subline):
 
 #parses prediction json response
 def parse_prediction(response, line, direc, subline):
+    data = response.json()
+    print json.dumps(data, indent=4)
+    if "mode" not in data:
+        return []
     data = response.json()["mode"]
     subway_data = None
     possible_trips = []
@@ -34,6 +38,7 @@ def parse_prediction(response, line, direc, subline):
 
     if found:
         found = 0
+        print "MODE"
     else:
         return []
 
@@ -45,14 +50,18 @@ def parse_prediction(response, line, direc, subline):
 
     if found:
         found = 0
+        print "ROUTE"
     else:
         return []
 
     #search for correct direction
     for x in subway_data:
+        print x["direction_name"]
+        print direc
         if x["direction_name"] == direc:
             subway_data = x["trip"]
             found = 1
+            print "DIRECTION"
 
     if found:
         found = 0
@@ -63,15 +72,14 @@ def parse_prediction(response, line, direc, subline):
         if x["trip_headsign"] == subline:
             possible_trips.append(x)
 
-    print possible_trips
+    #print possible_trips
 
     # retreive possible times for station
     for trip in possible_trips:
-        time = trip["pre_dt"]
-        #if "Green" in line:
-        #    time = trip["pre_dt"]
-        #else:
-        #    time = trip["sch_arr_dt"]
+        if "sch_arr_dt" in trip:
+            time = trip["sch_arr_dt"]
+        else:
+            time = trip["pre_dt"]
         # converts epoch timestamp to 24 hour timestamp
         time_format = "%H:%M"
         time = datetime.datetime.fromtimestamp(float(time)).strftime(time_format)
@@ -99,3 +107,6 @@ def parse_api_name(response, station):
                 if stop["parent_station_name"] == station:
                     return stop["parent_station"]
     return None
+
+
+print make_prediction(find_api_name("Orange", "Jackson Square"), "Orange", "Northbound", "Oak Grove")

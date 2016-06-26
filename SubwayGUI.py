@@ -1,16 +1,9 @@
+import json
 from Tkinter import *
 import mysql.connector
 from mysql.connector import errorcode
 import random
 from mbta_api import make_prediction, find_api_name
-
-directions_dict = {"Wonderland": "Eastbound", "Bowdoin": "Westbound",
-    "Ashmont": "Southbound", "Braintree": "Southbound", "Alewife": "Northbound",
-    "Forest Hills": "Southbound", "Oak Grove": "Northbound",
-    "Park Street": "Eastbound", "North Station": "Eastbound",
-    "Lechmere": "Eastbound", "Government Center": "Eastbound",
-    "Boston College": "Westbound", "Cleveland Circle": "Westbound",
-    "Riverside": "Westbound", "Heath Street": "Westbound"}
 
 line_options = [
     "Blue",
@@ -22,6 +15,7 @@ line_options = [
     "Red",
 ]
 
+#sublines
 red_sublines = ["Ashmont", "Braintree", "Alewife"]
 blue_sublines = ["Wonderland", "Bowdoin"]
 orange_sublines = ["Oak Grove", "Forest Hills"]
@@ -29,6 +23,15 @@ green_b_sublines = ["Park Street", "Boston College"]
 green_c_sublines = ["North Station", "Cleveland Circle"]
 green_d_sublines = ["Government Center", "Riverside"]
 green_e_sublines = ["Lechmere", "Heath Street"]
+
+# dictionary for corresponding direction of sublines
+directions_dict = {"Wonderland": "Eastbound", "Bowdoin": "Westbound",
+"Ashmont": "Southbound", "Braintree": "Southbound", "Alewife": "Northbound",
+"Forest Hills": "Southbound", "Oak Grove": "Northbound",
+"Park Street": "Eastbound", "North Station": "Eastbound",
+"Lechmere": "Eastbound", "Government Center": "Eastbound",
+"Boston College": "Westbound", "Cleveland Circle": "Westbound",
+"Riverside": "Westbound", "Heath Street": "Westbound"}
 
 blue_line_stations = [
     "Wonderland",
@@ -200,6 +203,8 @@ class Example(Frame):
         self.arrive_station_menu = None
         self.start_line = StringVar(self)
         self.end_line = StringVar(self)
+        self.start_subline = StringVar(self)
+        self.end_subline = StringVar(self)
         self.start_station = StringVar(self)
         self.end_station = StringVar(self)
         self.output_box = Text(self)
@@ -208,7 +213,7 @@ class Example(Frame):
 
     def connectToDB(self):
         try:
-            cnx = mysql.connector.connect(user='root', password='root', host='127.0.0.1', database='MBTA_Subway')
+            cnx = mysql.connector.connect(user='root', password='', host='127.0.0.1', database='MBTA_Subway')
             print("Connection opened.")
             return cnx
         except mysql.connector.Error as err:
@@ -306,8 +311,21 @@ class Example(Frame):
         self.output_box.config(state=DISABLED)
 
     def saveRouteCommand(self):
+        user = self.cnx.user
+        firstcolor = self.start_line
+        firstsubline = self.start_subline
+        firststation = self.start_station
+        secondcolor = self.end_line
+        secondsubline = self.end_subline
+        secondstation = self.end_station
+
         self.output_box.config(state=NORMAL)
-        self.output_box.insert(END, "Write route to database\n")
+        stmt = "INSERT INTO Track (user, first_color, first_subline, first_station, " \
+                "dest_color, dest_subline, dest_station) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s')" \
+                % (user, firstcolor.get(), firstsubline, firststation.get(), secondcolor.get(), secondsubline, secondstation.get())
+        print stmt
+        self.cnx.cmd_query(query=stmt)
+        self.output_box.insert(END, "Saved track with given depart and arrive stations.")
         self.output_box.config(state=DISABLED)
 
     def loadRouteCommand(self):
@@ -319,33 +337,33 @@ class Example(Frame):
         depart_sublines = None
         arrive_sublines = None
 
-        if self.start_line == "Blue":
+        if self.start_line.get() == "Blue":
             depart_sublines = random.choice(blue_sublines)
-        elif self.start_line == "Red":
+        elif self.start_line.get() == "Red":
             depart_sublines = random.choice(red_sublines)
-        elif self.start_line == "Green-B":
-            depart_sublines = green_b_sublines
-        elif self.start_line == "Green-C":
-            depart_sublines = green_c_sublines
-        elif self.start_line == "Green-D":
-            depart_sublines = green_d_sublines
-        elif self.start_line == "Green-E":
-            depart_sublines = green_e_sublines
+        elif self.start_line.get() == "Green-B":
+            depart_sublines = random.choice(green_b_sublines)
+        elif self.start_line.get() == "Green-C":
+            depart_sublines = random.choice(green_c_sublines)
+        elif self.start_line.get() == "Green-D":
+            depart_sublines = random.choice(green_d_sublines)
+        elif self.start_line.get() == "Green-E":
+            depart_sublines = random.choice(green_e_sublines)
         else:
             depart_sublines = random.choice(orange_sublines)
 
-        if self.end_line == "Blue":
+        if self.end_line.get() == "Blue":
             arrive_sublines = random.choice(blue_sublines)
-        elif self.end_line == "Red":
+        elif self.end_line.get() == "Red":
             arrive_sublines = random.choice(red_sublines)
-        elif self.end_line == "Green-B":
-            arrive_sublines = green_b_sublines
-        elif self.end_line == "Green-C":
-            arrive_sublines = green_c_sublines
-        elif self.end_line == "Green-D":
-            arrive_sublines = green_d_sublines
-        elif self.end_line == "Green-E":
-            arrive_sublines = green_e_sublines
+        elif self.end_line.get() == "Green-B":
+            arrive_sublines = random.choice(green_b_sublines)
+        elif self.end_line.get() == "Green-C":
+            arrive_sublines = random.choice(green_c_sublines)
+        elif self.end_line.get() == "Green-D":
+            arrive_sublines = random.choice(green_d_sublines)
+        elif self.end_line.get() == "Green-E":
+            arrive_sublines = random.choice(green_e_sublines)
         else:
             arrive_sublines = random.choice(orange_sublines)
 
@@ -356,8 +374,7 @@ class Example(Frame):
             self.output_box.insert(END, "Finding first station...\n")
             depart_predict = make_prediction(find_api_name(line, station), line,
                                         directions_dict.get(depart_sublines), depart_sublines)
-
-            self.output_box.insert(END, "Next train at " + self.start_station.get() + ": " + depart_predict + "\n")
+            self.output_box.insert(END, "Next train at " + station + ": " + str(depart_predict[0]) + "\n")
             self.output_box.config(state=DISABLED)
 
         if self.arrive_station_menu is not None:
@@ -367,13 +384,16 @@ class Example(Frame):
             self.output_box.insert(END, "Finding second station...\n")
             arrive_predict = make_prediction(find_api_name(line, station), line,
                                         directions_dict.get(arrive_sublines), arrive_sublines)
-            self.output_box.insert(END, "Next train at " + self.end_station.get() + ": " + arrive_predict + "\n")
+            self.output_box.insert(END, "Next train at " + station + ": " + str(arrive_predict[0]) + "\n")
             self.output_box.config(state=DISABLED)
 
 
     def deleteRouteCommand(self):
         self.output_box.config(state=NORMAL)
-        self.output_box.insert(END, "Deleted current route from database, if stored\n")
+        stmt = "DELETE FROM Track WHERE first_station=\"" + self.start_station.get() + \
+               "\" AND dest_station=\"" + self.end_station.get() + "\""
+        self.cnx.cmd_query(query=stmt)
+        self.output_box.insert(END, "Deleted track with given depart and arrive stations.\n")
         self.output_box.config(state=DISABLED)
 
     def onExit(self):
@@ -385,18 +405,25 @@ class Example(Frame):
 
         if (current_line == "Blue"):
             station_options = blue_line_stations
+            self.start_subline = random.choice(blue_sublines)
         elif (current_line == "Green-B"):
             station_options = green_line_b_stations
+            self.start_subline = random.choice(green_b_sublines)
         elif (current_line == "Green-C"):
             station_options = green_line_c_stations
+            self.start_subline = random.choice(green_c_sublines)
         elif (current_line == "Green-D"):
             station_options = green_line_d_stations
+            self.start_subline = random.choice(green_d_sublines)
         elif (current_line == "Green-E"):
             station_options = green_line_e_stations
+            self.start_subline = random.choice(green_e_sublines)
         elif (current_line == "Red"):
             station_options = red_line_stations
+            self.start_subline = random.choice(red_sublines)
         else:
             station_options = orange_line_stations
+            self.start_subline = random.choice(orange_sublines)
 
         depart_station_menu = OptionMenu(self, self.start_station, *station_options)
         if self.depart_station_menu is not None:
@@ -410,18 +437,25 @@ class Example(Frame):
 
         if (current_line == "Blue"):
             station_options = blue_line_stations
+            self.end_subline = random.choice(blue_sublines)
         elif (current_line == "Green-B"):
             station_options = green_line_b_stations
+            self.end_subline = random.choice(green_b_sublines)
         elif (current_line == "Green-C"):
             station_options = green_line_c_stations
+            self.end_subline = random.choice(green_c_sublines)
         elif (current_line == "Green-D"):
             station_options = green_line_d_stations
+            self.end_subline = random.choice(green_d_sublines)
         elif (current_line == "Green-E"):
             station_options = green_line_e_stations
+            self.end_subline = random.choice(green_e_sublines)
         elif (current_line == "Red"):
             station_options = red_line_stations
+            self.end_subline = random.choice(red_sublines)
         else:
             station_options = orange_line_stations
+            self.end_subline = random.choice(orange_sublines)
 
         arrive_station_menu = OptionMenu(self, self.end_station, *station_options)
         if self.arrive_station_menu is not None:
